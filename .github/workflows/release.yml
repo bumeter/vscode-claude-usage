@@ -31,12 +31,12 @@ jobs:
             ext=""; case "$target" in *windows*) ext=".exe" ;; esac
             scripts/fetch-bum.sh "$target" ".bum/bum-$target$ext"
             BUM_BINARY=".bum/bum-$target$ext" BUM_PLATFORM="$vsce" node scripts/bundle-bum.mjs
-            npx vsce package --no-dependencies --target "$vsce" -o "out/claude-usage-$vsce-$version.vsix"
+            npx vsce package --no-dependencies --target "$vsce" -o "out/bumeter-claude-usage-$vsce-$version.vsix"
           done
           ls -la out
       - uses: actions/upload-artifact@v4
         with:
-          name: claude-usage-vsix
+          name: bumeter-claude-usage-vsix
           path: out/*.vsix
       - if: startsWith(github.ref, 'refs/tags/v')
         env:

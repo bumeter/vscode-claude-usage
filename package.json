@@ -1,8 +1,8 @@
 {
-  "name": "claude-usage",
+  "name": "bumeter-claude-usage",
   "displayName": "Claude Code Usage — Quota & Context in the Status Bar",
   "description": "Your Claude Code 5-hour and weekly quota, reset times and this workspace's context in the VS Code status bar. Read from the logs on your machine; nothing leaves it. by Bumeter (unofficial, not made by Anthropic).",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "bumkom",
   "license": "GPL-3.0-or-later",
   "repository": {

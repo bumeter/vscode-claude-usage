@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Marketplace ID is now `bumkom.bumeter-claude-usage` (the name `claude-usage` was taken). Nothing else changes.
+
 ## 0.1.0
 
 First release.

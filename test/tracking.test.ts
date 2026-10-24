@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { hookBumPath, needsRepoint, isTracked } from '../src/tracking';
 
-const UNIX = '{ "/home/u/.vscode/extensions/bumkom.claude-usage-0.1.0-linux-x64/bin/linux-x64/bum" statusline --tee 2>/dev/null || cat; } | { npx ccstatusline; }';
-const WIN = '"C:\\Users\\u\\.vscode\\extensions\\bumkom.claude-usage-0.1.0-win32-x64\\bin\\win32-x64\\bum.exe" statusline --tee | ( npx ccstatusline )';
+const UNIX = '{ "/home/u/.vscode/extensions/bumkom.bumeter-claude-usage-0.1.0-linux-x64/bin/linux-x64/bum" statusline --tee 2>/dev/null || cat; } | { npx ccstatusline; }';
+const WIN = '"C:\\Users\\u\\.vscode\\extensions\\bumkom.bumeter-claude-usage-0.1.0-win32-x64\\bin\\win32-x64\\bum.exe" statusline --tee | ( npx ccstatusline )';
 
 describe('hookBumPath', () => {
   it('is the quoted bum the hook runs, on Unix and Windows', () => {
-    expect(hookBumPath(UNIX)).toBe('/home/u/.vscode/extensions/bumkom.claude-usage-0.1.0-linux-x64/bin/linux-x64/bum');
-    expect(hookBumPath(WIN)).toBe('C:\\Users\\u\\.vscode\\extensions\\bumkom.claude-usage-0.1.0-win32-x64\\bin\\win32-x64\\bum.exe');
+    expect(hookBumPath(UNIX)).toBe('/home/u/.vscode/extensions/bumkom.bumeter-claude-usage-0.1.0-linux-x64/bin/linux-x64/bum');
+    expect(hookBumPath(WIN)).toBe('C:\\Users\\u\\.vscode\\extensions\\bumkom.bumeter-claude-usage-0.1.0-win32-x64\\bin\\win32-x64\\bum.exe');
     expect(hookBumPath('"/usr/bin/bum" statusline --around \'x\'')).toBe('/usr/bin/bum');
   });
 
@@ -18,7 +18,7 @@ describe('hookBumPath', () => {
 });
 
 describe('needsRepoint', () => {
-  const ours = '/home/u/.vscode/extensions/bumkom.claude-usage-0.2.0-linux-x64/bin/linux-x64/bum';
+  const ours = '/home/u/.vscode/extensions/bumkom.bumeter-claude-usage-0.2.0-linux-x64/bin/linux-x64/bum';
   const hooked = (command: string) => ({ kind: 'hooked' as const, command, show: false });
 
   it('a hook whose bum is gone (the extension was updated) is set up again with ours', () => {
