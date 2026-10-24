@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- New icon: a quota gauge with the Bumeter flame.
+- Screenshots of every style, the tooltip and the picker on the Marketplace page, and an FAQ.
+
 ## 0.2.0
 
 - **Status bar styles**: Choose Status Bar Style lists 13 ways to draw the numbers (Countdown, Forecast, Smooth bar, Split, Traffic light, Battery, …) and previews each on the status bar as you move through the list, like picking a color theme. **Custom…** takes your own template (`claudeUsage.customFormat`). Classic stays the default.
