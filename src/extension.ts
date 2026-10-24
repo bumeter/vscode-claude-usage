@@ -4,13 +4,10 @@
 // item (Bumeter shows the same one) and keeps its commands.
 import * as fs from 'node:fs';
 import * as vscode from 'vscode';
-import { ensureExecutable, findBum } from '../binary';
-import { langOf, t } from '../format';
-import type { Lang } from '../format';
-import { projectOf } from '../project';
-import { RpcClient } from '../rpc';
-import { StatusBar } from '../status';
-import type { StatusOptions } from '../status';
+import { ensureExecutable, findBum, langOf, projectOf, RpcClient, StatusBar, t as shared } from '@bumeter/vscode-kit';
+import type { Lang } from '@bumeter/vscode-kit';
+import { usageOptions } from './options';
+import { t } from './strings';
 import { isTracked, needsRepoint } from './tracking';
 import type { StatuslineStatus } from './tracking';
 
@@ -21,21 +18,6 @@ type Mode = 'record' | 'show';
 interface Settings { statusline: StatuslineStatus; statusline_show: boolean }
 
 let rpc: RpcClient | undefined;
-
-export function usageOptions(tracked: boolean): StatusOptions {
-  return {
-    id: 'claudeUsage.status',
-    name: 'Claude Code Usage',
-    click: 'claudeUsage.click',
-    fallback: tracked ? '5h/7d …' : '5h/7d: set up',
-    noLimits: tracked ? 'usageWaiting' : 'usageSetup',
-    links: [
-      ...(tracked ? [] : [{ key: 'setupTracking' as const, command: 'claudeUsage.setupTracking' }]),
-      { key: 'refresh', command: 'claudeUsage.refresh' },
-      { key: 'getFull', command: 'claudeUsage.getFull' },
-    ],
-  };
-}
 
 async function settings(c: RpcClient): Promise<Settings | null> {
   return c.call<Settings>('settings:get').catch(() => null);
@@ -74,7 +56,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
   if (!bin) {
     const item = vscode.window.createStatusBarItem('claudeUsage.status', vscode.StatusBarAlignment.Right, 100);
     item.text = '$(flame) $(warning)';
-    item.tooltip = t(lang, 'noBum');
+    item.tooltip = shared(lang, 'noBum');
     item.command = { title: 'Settings', command: 'workbench.action.openSettings', arguments: ['claudeUsage.binaryPath'] };
     item.show();
     ctx.subscriptions.push(item);
@@ -82,7 +64,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
   }
   if (bin.startsWith(ctx.extensionPath)) ensureExecutable(bin);
   const c = (rpc = RpcClient.forBinary(bin));
-  const opts = usageOptions(false);
+  const opts = usageOptions(false, lang);
   const status = new StatusBar(c, projectOf(vscode.workspace.workspaceFolders), lang, opts);
   let tracked = false;
 
@@ -94,7 +76,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
       await c.call('settings:statusline_apply', { mode }).catch(() => undefined);
     }
     tracked = isTracked(s?.statusline);
-    Object.assign(opts, usageOptions(tracked));
+    Object.assign(opts, usageOptions(tracked, lang));
     await status.refresh();
   };
   const full = () => vscode.extensions.getExtension(FULL_ID) !== undefined;

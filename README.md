@@ -34,4 +34,17 @@ Claude Code Usage is the status bar of [Bumeter](https://bumeter.cc), which read
 
 [Bumeter for VS Code](https://marketplace.visualstudio.com/items?itemName=bumkom.bumeter) · [Desktop app](https://github.com/bumeter/bumeter) · [bum, the command line](https://github.com/bumeter/statusline)
 
-Not affiliated with Anthropic. License: GPL-3.0-or-later. Source: [bumeter/vscode](https://github.com/bumeter/vscode).
+## Develop
+
+```
+npm install
+npm test                    # unit tests
+npm run build               # dist/extension.js
+scripts/fetch-bum.sh x86_64-unknown-linux-gnu .bum/bum
+BUM_BINARY=.bum/bum BUM_PLATFORM=linux-x64 npm run bundle-bum
+npx vsce package --no-dependencies --target linux-x64
+```
+
+Shared code (the `bum rpc` client, the status bar item) comes from [`@bumeter/vscode-kit`](https://github.com/bumeter/vscode-kit), `bum` from [bumeter/statusline](https://github.com/bumeter/statusline) releases (`BUM_VERSION`). Tagging `vX.Y.Z` builds one `.vsix` per platform and attaches them to a GitHub Release.
+
+Not affiliated with Anthropic. License: GPL-3.0-or-later. Source: [bumeter/vscode-claude-usage](https://github.com/bumeter/vscode-claude-usage).

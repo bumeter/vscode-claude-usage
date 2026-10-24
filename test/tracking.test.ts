@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hookBumPath, needsRepoint, isTracked } from '../src/usage/tracking';
+import { hookBumPath, needsRepoint, isTracked } from '../src/tracking';
 
 const UNIX = '{ "/home/u/.vscode/extensions/bumkom.claude-usage-0.1.0-linux-x64/bin/linux-x64/bum" statusline --tee 2>/dev/null || cat; } | { npx ccstatusline; }';
 const WIN = '"C:\\Users\\u\\.vscode\\extensions\\bumkom.claude-usage-0.1.0-win32-x64\\bin\\win32-x64\\bum.exe" statusline --tee | ( npx ccstatusline )';

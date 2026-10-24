@@ -1,1 +1,13 @@
+src/**
+test/**
+scripts/**
+node_modules/**
+.github/**
+.bum/**
+out/**
+esbuild.mjs
+vitest.config.mjs
+tsconfig.json
+BUM_VERSION
 **/*.map
+.gitignore
