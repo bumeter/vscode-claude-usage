@@ -11,3 +11,6 @@ tsconfig.json
 BUM_VERSION
 **/*.map
 .gitignore
+media/icon.svg
+media/screenshots/**
+media/social-preview.png

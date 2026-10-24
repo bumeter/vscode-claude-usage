@@ -1,7 +1,7 @@
 {
   "name": "bumeter-claude-usage",
   "displayName": "Claude Code Usage — Quota & Context in the Status Bar",
-  "description": "Your Claude Code 5-hour and weekly quota, reset times and this workspace's context in the VS Code status bar. Read from the logs on your machine; nothing leaves it. by Bumeter (unofficial, not made by Anthropic).",
+  "description": "See your Claude Code usage limits in the VS Code status bar: 5-hour and weekly quota left, reset times, a forecast and this workspace's context. 13 status bar styles. Local only, nothing leaves your machine. By Bumeter (unofficial, not made by Anthropic).",
   "version": "0.2.0",
   "publisher": "bumkom",
   "license": "GPL-3.0-or-later",
@@ -11,19 +11,27 @@
   },
   "homepage": "https://bumeter.cc",
   "categories": [
-    "Other",
-    "Visualization"
+    "AI",
+    "Visualization",
+    "Other"
   ],
   "keywords": [
     "claude code",
-    "claude",
-    "usage",
-    "quota",
+    "claude code usage",
+    "claude usage",
+    "usage limit",
     "rate limit",
+    "quota",
+    "5-hour limit",
+    "weekly limit",
+    "claude max",
+    "claude pro",
     "statusline",
     "status bar",
     "context",
+    "context window",
     "tokens",
+    "claude",
     "anthropic",
     "ai",
     "bumeter"
@@ -118,7 +126,7 @@
   },
   "icon": "media/icon.png",
   "galleryBanner": {
-    "color": "#1e1e1e",
+    "color": "#2a1f4d",
     "theme": "dark"
   },
   "engines": {
@@ -139,5 +147,8 @@
     "esbuild": "^0.28.0",
     "typescript": "^5.6.0",
     "vitest": "^3.2.0"
+  },
+  "bugs": {
+    "url": "https://github.com/bumeter/vscode-claude-usage/issues"
   }
 }

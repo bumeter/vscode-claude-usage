@@ -1,10 +1,14 @@
 # Claude Code Usage — quota and context in the status bar
 
-How much of your Claude Code **5-hour** and **weekly** limit is left, when it resets, and how big this workspace's context is, always in view:
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/bumkom.bumeter-claude-usage?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=bumkom.bumeter-claude-usage)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/bumkom.bumeter-claude-usage)](https://marketplace.visualstudio.com/items?itemName=bumkom.bumeter-claude-usage)
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 
-```
-🔥 5h 62% · 7d 41% · ctx 312K
-```
+**See your Claude Code usage limits in the VS Code status bar:** how much of the **5-hour** and **weekly** quota is left, when each one resets, whether you will hit the limit before the reset, and how big this workspace's context is. 13 status bar styles to pick from, like a color theme. Local only, no account, no API key.
+
+![Claude Code 5-hour and weekly quota in the VS Code status bar, with reset times and context in the tooltip](https://raw.githubusercontent.com/bumeter/vscode-claude-usage/main/media/screenshots/tooltip.png)
+
+![The status bar turns yellow from 70% and red from 90% of the Claude Code limit](https://raw.githubusercontent.com/bumeter/vscode-claude-usage/main/media/screenshots/levels.png)
 
 - **Yellow** from 70% (or when the forecast says you will run out before the reset, or the context is past its threshold), **red** from 90% or while you are blocked.
 - **Hover** for reset times (`resets 14:30 · in 1h20`), the forecast, and the context of this workspace's latest session, with a hint to `/compact` when it is too big.
@@ -13,7 +17,11 @@ How much of your Claude Code **5-hour** and **weekly** limit is left, when it re
 
 ## Styles
 
+![13 status bar styles for Claude Code usage: classic, countdown, forecast, smooth bar, split, compact, bars, traffic light, reset clock, battery, peak, context first, minimal, custom](https://raw.githubusercontent.com/bumeter/vscode-claude-usage/main/media/screenshots/styles.png)
+
 Run **Claude Code Usage: Choose Status Bar Style** and move through the list: the status bar redraws as you go, like picking a color theme. Enter keeps the style, Escape puts the old one back.
+
+![Choose Status Bar Style: the status bar previews each style as you move through the list](https://raw.githubusercontent.com/bumeter/vscode-claude-usage/main/media/screenshots/picker.png)
 
 | Style | Looks like |
 |---|---|
@@ -44,6 +52,20 @@ It changes one line, `statusLine.command` in `~/.claude/settings.json`, shows yo
 
 On Windows, run Remove Quota Tracking before uninstalling the extension. On Linux and macOS your status line keeps working either way.
 
+## FAQ
+
+**How do I see my Claude Code usage limit?** Install this extension and run **Set Up Quota Tracking** once. The 5-hour and weekly percentages then stay in the status bar, with reset times on hover.
+
+**When does the Claude Code 5-hour limit reset?** Hover the item: it shows the clock time and the time left (`resets 14:30 · in 1h20`), or pick the **Countdown** or **Reset clock** style to keep it in view.
+
+**Will I run out before the reset?** The **Forecast** style (and the tooltip) projects your current pace: the item turns yellow when you would hit 100% before the window resets.
+
+**How big is my context?** The `ctx` number is the context of this workspace's latest Claude Code session; it turns yellow past its threshold, a good moment to `/compact`.
+
+**Does it send my data anywhere?** No. It reads Claude Code's files on your machine; nothing is uploaded.
+
+**Pro, Max, Team?** It shows the limits Claude Code itself reports, whatever your plan.
+
 ## Settings
 
 | Setting | Default | |
@@ -69,6 +91,8 @@ BUM_BINARY=.bum/bum BUM_PLATFORM=linux-x64 npm run bundle-bum
 npx vsce package --no-dependencies --target linux-x64
 ```
 
+Screenshots: `CHROME=/path/to/chrome node scripts/screenshots.mjs` (made-up numbers, real style code) writes `media/screenshots/`.
+
 Shared code (the `bum rpc` client, the status bar item) comes from [`@bumeter/vscode-kit`](https://github.com/bumeter/vscode-kit), `bum` from [bumeter/statusline](https://github.com/bumeter/statusline) releases (`BUM_VERSION`). Tagging `vX.Y.Z` builds one `.vsix` per platform and attaches them to a GitHub Release.
 
-Not affiliated with Anthropic. License: GPL-3.0-or-later. Source: [bumeter/vscode-claude-usage](https://github.com/bumeter/vscode-claude-usage).
+Not affiliated with Anthropic; Claude is a trademark of Anthropic. License: GPL-3.0-or-later. Source: [bumeter/vscode-claude-usage](https://github.com/bumeter/vscode-claude-usage).
