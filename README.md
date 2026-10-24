@@ -11,6 +11,28 @@ How much of your Claude Code **5-hour** and **weekly** limit is left, when it re
 - **Local only**: everything is read from Claude Code's files on the machine the workspace is on. Nothing is uploaded, no account, no API key.
 - Works in remote windows (SSH, WSL, Dev Containers, Codespaces), and in Cursor and Windsurf.
 
+## Styles
+
+Run **Claude Code Usage: Choose Status Bar Style** and move through the list: the status bar redraws as you go, like picking a color theme. Enter keeps the style, Escape puts the old one back.
+
+| Style | Looks like |
+|---|---|
+| Classic (default) | `🔥 5h 62% · 7d 41% · ctx 312K` |
+| Countdown | `🔥 5h 62% ↻1h20 · 7d 41% ↻3d4h` |
+| Forecast | `🔥 5h 62% → 100% at 16:40` |
+| Smooth bar | `5h ███▊░░ 62% · 7d ██▌░░░` |
+| Split | three items (5h, 7d, ctx), each with its own color; right-click the status bar to hide one |
+| Compact | `🔥 62% · 41%` |
+| Bars | `5h ▰▰▰▰▰▰▱▱▱▱  7d ▰▰▰▰▱▱▱▱▱▱` |
+| Traffic light | `🟢 5h 62%  🟢 7d 41%` |
+| Reset clock | `🔥 5h 62% · resets 14:20` |
+| Battery | `🔋 38% · 59% left` |
+| Peak | `🔥 5h 62%`, only the window closest to its limit |
+| Context first | `ctx 312K ▰▰▰▰▰▰▱▱ · 5h 62%` |
+| Minimal | `🔥 62`; the rest is in the tooltip |
+
+**Custom…** takes your own template, previewed as you type, for example `$(flame) {5h} | {7d} | ctx {ctxPct}`. The values are listed under `claudeUsage.customFormat` in Settings.
+
 ## Set up (once)
 
 Claude Code sends the quota numbers only to its status line. Run **Claude Code Usage: Set Up Quota Tracking** (or click the item) and pick:
@@ -26,6 +48,8 @@ On Windows, run Remove Quota Tracking before uninstalling the extension. On Linu
 
 | Setting | Default | |
 |---|---|---|
+| `claudeUsage.style` | `classic` | How the status bar draws the numbers; see [Styles](#styles) |
+| `claudeUsage.customFormat` | empty | The template of the `custom` style |
 | `claudeUsage.binaryPath` | empty | Path to `bum`; empty uses the one bundled with the extension, then `PATH` |
 
 ## Part of Bumeter

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0
+
+- **Status bar styles**: Choose Status Bar Style lists 13 ways to draw the numbers (Countdown, Forecast, Smooth bar, Split, Traffic light, Battery, …) and previews each on the status bar as you move through the list, like picking a color theme. **Custom…** takes your own template (`claudeUsage.customFormat`). Classic stays the default.
+- The tooltip links to the picker.
+
 ## 0.1.1
 
 - Marketplace ID is now `bumkom.bumeter-claude-usage` (the name `claude-usage` was taken). Nothing else changes.

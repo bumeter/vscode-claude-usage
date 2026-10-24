@@ -2,7 +2,7 @@
   "name": "bumeter-claude-usage",
   "displayName": "Claude Code Usage — Quota & Context in the Status Bar",
   "description": "Your Claude Code 5-hour and weekly quota, reset times and this workspace's context in the VS Code status bar. Read from the logs on your machine; nothing leaves it. by Bumeter (unofficial, not made by Anthropic).",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "bumkom",
   "license": "GPL-3.0-or-later",
   "repository": {
@@ -53,6 +53,11 @@
         "category": "Claude Code Usage"
       },
       {
+        "command": "claudeUsage.chooseStyle",
+        "title": "Choose Status Bar Style",
+        "category": "Claude Code Usage"
+      },
+      {
         "command": "claudeUsage.getFull",
         "title": "Get Bumeter (Overview, Skills, Files)",
         "category": "Claude Code Usage"
@@ -61,6 +66,48 @@
     "configuration": {
       "title": "Claude Code Usage",
       "properties": {
+        "claudeUsage.style": {
+          "type": "string",
+          "default": "classic",
+          "enum": [
+            "classic",
+            "countdown",
+            "forecast",
+            "smooth",
+            "split",
+            "compact",
+            "bars",
+            "traffic",
+            "resetclock",
+            "battery",
+            "peak",
+            "context",
+            "minimal",
+            "custom"
+          ],
+          "enumDescriptions": [
+            "5h 62% · 7d 41% · ctx 312K",
+            "5h 62% ↻1h20 · 7d 41% ↻3d4h",
+            "5h 62% → 100% at 16:40",
+            "5h ███▊░░ 62% · 7d ██▌░░░",
+            "Three items: 5h, 7d, ctx, each with its own colour",
+            "62% · 41%",
+            "5h ▰▰▰▰▰▰▱▱▱▱  7d ▰▰▰▰▱▱▱▱▱▱",
+            "🟢 5h 62%  🟢 7d 41%",
+            "5h 62% · resets 14:20",
+            "🔋 38% · 59% left",
+            "Only the window closest to its limit: 5h 62%",
+            "ctx 312K ▰▰▰▰▰▰▱▱ · 5h 62%",
+            "62 (the rest is in the tooltip)",
+            "Your own template: claudeUsage.customFormat"
+          ],
+          "markdownDescription": "How the status bar draws the quota. Run **Claude Code Usage: Choose Status Bar Style** to preview them as you move through the list."
+        },
+        "claudeUsage.customFormat": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "The template of the `custom` style. Values: `{5h}` `{7d}` `{5hLeft}` `{7dLeft}` `{5hReset}` `{7dReset}` `{5hResetAt}` `{7dResetAt}` `{5hHits}` `{ctx}` `{ctxPct}` `{bar5h}` `{bar7d}` `{barCtx}` `{smooth5h}` `{smooth7d}` `{light5h}` `{light7d}` `{peak}` `{blocked}`; icons as `$(flame)`. Example: `$(flame) {5h} | {7d} | ctx {ctxPct}`."
+        },
         "claudeUsage.binaryPath": {
           "type": "string",
           "default": "",
@@ -85,7 +132,7 @@
     "bundle-bum": "node scripts/bundle-bum.mjs"
   },
   "devDependencies": {
-    "@bumeter/vscode-kit": "^0.1.0",
+    "@bumeter/vscode-kit": "^0.2.0",
     "@types/node": "^20.0.0",
     "@types/vscode": "1.85.0",
     "@vscode/vsce": "^3.0.0",
