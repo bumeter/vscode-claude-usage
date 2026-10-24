@@ -7,7 +7,10 @@ import * as vscode from 'vscode';
 import { ensureExecutable, findBum, langOf, projectOf, RpcClient, StatusBar, t as shared } from '@bumeter/vscode-kit';
 import type { Lang } from '@bumeter/vscode-kit';
 import { usageOptions } from './options';
+import type { Look } from './options';
+import { chooseStyle } from './picker';
 import { t } from './strings';
+import { styleSetting } from './styles';
 import { isTracked, needsRepoint } from './tracking';
 import type { StatuslineStatus } from './tracking';
 
@@ -64,7 +67,11 @@ export function activate(ctx: vscode.ExtensionContext): void {
   }
   if (bin.startsWith(ctx.extensionPath)) ensureExecutable(bin);
   const c = (rpc = RpcClient.forBinary(bin));
-  const opts = usageOptions(false, lang);
+  const look = (): Look => {
+    const cfg = vscode.workspace.getConfiguration('claudeUsage');
+    return { style: styleSetting(cfg.get('style')), template: cfg.get<string>('customFormat', '') };
+  };
+  const opts = usageOptions(false, lang, look());
   const status = new StatusBar(c, projectOf(vscode.workspace.workspaceFolders), lang, opts);
   let tracked = false;
 
@@ -76,7 +83,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
       await c.call('settings:statusline_apply', { mode }).catch(() => undefined);
     }
     tracked = isTracked(s?.statusline);
-    Object.assign(opts, usageOptions(tracked, lang));
+    Object.assign(opts, usageOptions(tracked, lang, look()));
     await status.refresh();
   };
   const full = () => vscode.extensions.getExtension(FULL_ID) !== undefined;
@@ -87,6 +94,12 @@ export function activate(ctx: vscode.ExtensionContext): void {
     { dispose: () => rpc?.dispose() },
     vscode.extensions.onDidChange(() => status.setHidden(full())),
     vscode.commands.registerCommand('claudeUsage.refresh', () => void sync()),
+    vscode.commands.registerCommand('claudeUsage.chooseStyle', () => chooseStyle(status, opts, lang, look())),
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (!e.affectsConfiguration('claudeUsage.style') && !e.affectsConfiguration('claudeUsage.customFormat')) return;
+      Object.assign(opts, look());
+      status.redraw();
+    }),
     vscode.commands.registerCommand('claudeUsage.click', () => (tracked ? void sync() : vscode.commands.executeCommand('claudeUsage.setupTracking'))),
     vscode.commands.registerCommand('claudeUsage.setupTracking', async () => {
       try {

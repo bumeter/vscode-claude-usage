@@ -2,10 +2,14 @@
 // here, so it is tested in plain Node.
 import type { Lang } from '@bumeter/vscode-kit/format';
 import type { StatusOptions } from '@bumeter/vscode-kit/status';
+import type { StyleChoice } from '@bumeter/vscode-kit/styles';
 import { t } from './strings';
 
-export function usageOptions(tracked: boolean, lang: Lang): StatusOptions {
+export interface Look { style: StyleChoice; template: string }
+
+export function usageOptions(tracked: boolean, lang: Lang, look: Look = { style: 'classic', template: '' }): StatusOptions {
   return {
+    ...look,
     id: 'claudeUsage.status',
     name: 'Claude Code Usage',
     click: 'claudeUsage.click',
@@ -14,6 +18,7 @@ export function usageOptions(tracked: boolean, lang: Lang): StatusOptions {
     links: [
       ...(tracked ? [] : [{ label: t(lang, 'setupTracking'), command: 'claudeUsage.setupTracking' }]),
       { label: t(lang, 'refresh'), command: 'claudeUsage.refresh' },
+      { label: t(lang, 'chooseStyle'), command: 'claudeUsage.chooseStyle' },
       { label: t(lang, 'getFull'), command: 'claudeUsage.getFull' },
     ],
   };

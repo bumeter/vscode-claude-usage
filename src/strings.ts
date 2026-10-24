@@ -10,6 +10,9 @@ export const t = localize({
     modeShow: 'Ghi số và hiện trên statusline của Claude Code', modeShowDetail: 'Thêm quota và context vào cuối dòng statusline',
     apply: 'Áp dụng', alreadyOn: 'Đã bật theo dõi hạn mức, không cần đổi gì.', removed: 'Đã gỡ hook: statusLine của Claude Code về như trước.',
     notTracked: 'Chưa bật theo dõi hạn mức nên không có gì để gỡ.',
+    chooseStyle: 'Chọn style', styleTitle: 'Claude Code Usage: chọn style status bar (↑ ↓ để xem trước)', custom: 'Tự viết…',
+    customDesc: 'Template của riêng bạn', customPrompt: 'Ví dụ: $(flame) {5h} | {7d} | ctx {ctxPct}. Biến: {vars}',
+    current: 'đang dùng',
   },
   en: {
     usageSetup: 'No 5h/7d numbers yet. Click to set up quota tracking: it adds a hook to Claude Code\'s statusLine (backed up, undoable).',
@@ -19,5 +22,8 @@ export const t = localize({
     modeShow: 'Record and show on Claude Code\'s status line', modeShowDetail: 'Adds quota and context at the end of the status line',
     apply: 'Apply', alreadyOn: 'Quota tracking is already on; nothing to change.', removed: 'Hook removed: Claude Code\'s statusLine is back as it was.',
     notTracked: 'Quota tracking is not on, so there is nothing to remove.',
+    chooseStyle: 'Choose style', styleTitle: 'Claude Code Usage: status bar style (↑ ↓ to preview)', custom: 'Custom…',
+    customDesc: 'Your own template', customPrompt: 'For example: $(flame) {5h} | {7d} | ctx {ctxPct}. Values: {vars}',
+    current: 'current',
   },
 });

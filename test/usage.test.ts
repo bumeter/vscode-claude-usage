@@ -6,7 +6,7 @@ describe('usageOptions', () => {
     const o = usageOptions(false, 'en');
     expect(o.fallback).toBe('5h/7d: set up');
     expect(o.noLimits).toContain('Click to set up quota tracking');
-    expect(o.links.map((l) => l.command)).toEqual(['claudeUsage.setupTracking', 'claudeUsage.refresh', 'claudeUsage.getFull']);
+    expect(o.links.map((l) => l.command)).toEqual(['claudeUsage.setupTracking', 'claudeUsage.refresh', 'claudeUsage.chooseStyle', 'claudeUsage.getFull']);
   });
 
   it('after the hook: it waits for Claude Code\'s next reply and no longer offers to set up', () => {
