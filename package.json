@@ -1,0 +1,80 @@
+{
+  "name": "claude-usage",
+  "displayName": "Claude Code Usage — Quota & Context in the Status Bar",
+  "description": "Your Claude Code 5-hour and weekly quota, reset times and this workspace's context in the VS Code status bar. Read from the logs on your machine; nothing leaves it. by Bumeter (unofficial, not made by Anthropic).",
+  "version": "0.1.0",
+  "publisher": "bumkom",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bumeter/vscode"
+  },
+  "homepage": "https://bumeter.cc",
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "claude code",
+    "claude",
+    "usage",
+    "quota",
+    "rate limit",
+    "statusline",
+    "status bar",
+    "context",
+    "tokens",
+    "anthropic",
+    "ai",
+    "bumeter"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "claudeUsage.setupTracking",
+        "title": "Set Up Quota Tracking",
+        "category": "Claude Code Usage"
+      },
+      {
+        "command": "claudeUsage.removeTracking",
+        "title": "Remove Quota Tracking",
+        "category": "Claude Code Usage"
+      },
+      {
+        "command": "claudeUsage.refresh",
+        "title": "Refresh",
+        "category": "Claude Code Usage"
+      },
+      {
+        "command": "claudeUsage.getFull",
+        "title": "Get Bumeter (Overview, Skills, Files)",
+        "category": "Claude Code Usage"
+      }
+    ],
+    "configuration": {
+      "title": "Claude Code Usage",
+      "properties": {
+        "claudeUsage.binaryPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the `bum` command. Empty: the one bundled with the extension, then `bum` on PATH."
+        }
+      }
+    }
+  },
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  }
+}

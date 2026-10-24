@@ -1,0 +1,44 @@
+# Tag usage-vX.Y.Z → Claude Code Usage X.Y.Z: one .vsix per platform, each with bum $(cat BUM_VERSION)
+# for that platform, attached to a GitHub Release. Upload them on the Marketplace (one per Update).
+name: Release Claude Code Usage
+on:
+  push:
+    tags: ['usage-v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run
+      - run: npm run build
+      - name: The tag matches products/usage/package.json
+        if: startsWith(github.ref, 'refs/tags/usage-v')
+        run: test "usage-v$(node -p "require('./products/usage/package.json').version")" = "$GITHUB_REF_NAME"
+      - name: Package for each platform
+        run: |
+          version=$(node -p "require('./products/usage/package.json').version")
+          mkdir -p out
+          for pair in linux-x64:x86_64-unknown-linux-gnu darwin-arm64:aarch64-apple-darwin darwin-x64:x86_64-apple-darwin win32-x64:x86_64-pc-windows-msvc; do
+            vsce=${pair%%:*}; target=${pair#*:}
+            ext=""; case "$target" in *windows*) ext=".exe" ;; esac
+            scripts/fetch-bum.sh "$target" ".bum/bum-$target$ext"
+            PRODUCT=usage BUM_BINARY=".bum/bum-$target$ext" BUM_PLATFORM="$vsce" node scripts/media.mjs
+            (cd products/usage && npx vsce package --no-dependencies --target "$vsce" -o "../../out/claude-usage-$vsce-$version.vsix")
+          done
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: claude-usage-vsix
+          path: out/*.vsix
+      - if: startsWith(github.ref, 'refs/tags/usage-v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" out/*.vsix --title "Claude Code Usage ${GITHUB_REF_NAME#usage-v}" --generate-notes --latest=false
