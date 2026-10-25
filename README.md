@@ -11,9 +11,17 @@
 ![The status bar turns yellow from 70% and red from 90% of the Claude Code limit](https://raw.githubusercontent.com/bumeter/vscode-claude-usage/main/media/screenshots/levels.png)
 
 - **Yellow** from 70% (or when the forecast says you will run out before the reset, or the context is past its threshold), **red** from 90% or while you are blocked.
-- **Hover** for reset times (`resets 14:30 · in 1h20`), the forecast, and the context of this workspace's latest session, with a hint to `/compact` when it is too big.
+- **Hover** for reset times (`resets 14:30 · in 1h20`), the forecast, the context of this workspace's latest session, this session's turns and tokens, today's tokens, cost and prompts, the burn rate, and today's models.
 - **Local only**: everything is read from Claude Code's files on the machine the workspace is on. Nothing is uploaded, no account, no API key.
 - Works in remote windows (SSH, WSL, Dev Containers, Codespaces), and in Cursor and Windsurf.
+
+## Usage view
+
+Click the status bar item (or run **Claude Code Usage: Open Usage**) for one tab with everything about your Claude Code usage: the 5-hour and weekly quota with the forecast, tokens, estimated cost, prompts and burn rate for Today, 7 days or 30 days, this workspace's session, a daily chart, and which models and projects used the quota.
+
+![The Usage view: quota, tokens, cost, burn rate, a daily chart and where the quota went](https://raw.githubusercontent.com/bumeter/vscode-claude-usage/main/media/screenshots/usage.png)
+
+![The Usage view in a light theme](https://raw.githubusercontent.com/bumeter/vscode-claude-usage/main/media/screenshots/usage-light.png)
 
 ## Styles
 
@@ -61,6 +69,8 @@ On Windows, run Remove Quota Tracking before uninstalling the extension. On Linu
 **Will I run out before the reset?** The **Forecast** style (and the tooltip) projects your current pace: the item turns yellow when you would hit 100% before the window resets.
 
 **How big is my context?** The `ctx` number is the context of this workspace's latest Claude Code session; it turns yellow past its threshold, a good moment to `/compact`.
+
+**Is the cost what I pay?** No: it is what the same tokens would cost at API prices, to compare days and models. A Pro or Max plan is a flat fee.
 
 **Does it send my data anywhere?** No. It reads Claude Code's files on your machine; nothing is uploaded.
 

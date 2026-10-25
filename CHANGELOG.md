@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+
+- **Usage view**: click the status bar item (or run **Open Usage**) for the quota and its forecast, tokens, estimated cost, prompts and burn rate for Today, 7 or 30 days, this session, a daily chart, and which models and projects used the quota. Bumeter's Overview look, light and dark.
+- The tooltip shows more: this session's turns and tokens, today's tokens, cost and prompts, the burn rate and today's models, with coloured percentages.
+
 ## 0.2.2
 
 - New icon: the quota gauge, orange on a dark tile, in place of the purple one.

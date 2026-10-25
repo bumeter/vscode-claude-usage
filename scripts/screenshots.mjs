@@ -62,13 +62,16 @@ ${[['Plenty left', usage(38, 22, 120_000)], ['Yellow from 70%', usage(76, 48)], 
 const limits = { five_hour: { used_percentage: 62, resets_at: now + 80 * 60 }, seven_day: { used_percentage: 41, resets_at: now + 3 * 86_400 + 4 * 3600 }, stale: false, blocked: null,
   forecast_five_hour: { hits_at: null, at_risk: false }, forecast_seven_day: { hits_at: null, at_risk: false } };
 const project = { latest: { session_id: 's', ts: new Date((now - 60) * 1000).toISOString(), context: 312_000 }, context_threshold: 400_000 };
-const view = renderStatus(limits, project, '~/work/my-app', 'en', now, { id: 'x', name: 'Claude Code Usage', click: '', fallback: '', noLimits: '',
-  links: [{ label: 'Refresh', command: '' }, { label: 'Choose style', command: '' }, { label: 'Get Bumeter', command: '' }] });
-const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`(.+?)`/g, '<code>$1</code>').replace(/\[(.+?)\]\(.*?\)/g, '<a>$1</a>')
-  .split(/\n{2,}/).filter((p) => p.trim()).map((p) => `<p>${p.trim()}</p>`).join('');
+const view = renderStatus(limits, project, '~/work/my-app', 'en', now, { id: 'x', name: 'Claude Code Usage', title: 'Claude Code Usage', html: true, click: '', fallback: '', noLimits: '',
+  extra: () => ['---', '**This session** · my-app: 14 turns · 1.8M tokens', '**Today** 12.4M tokens · ≈$18.20 · 46 prompts', '**Burn** 2.1M tokens/h (last 30 min)', '**Models today** Opus 71% · Sonnet 24% · Haiku 5%'].join('\n\n'),
+  links: [{ label: 'Open Usage', command: '' }, { label: 'Refresh', command: '' }, { label: 'Choose style', command: '' }, { label: 'Get Bumeter', command: '' }] });
+const md = (s) => s.split(/(<span style="[^"]*">|<\/span>)/).map((p, i) => (i % 2 ? p : esc(p))).join('')
+  .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`(.+?)`/g, '<code>$1</code>').replace(/\[(.+?)\]\(.*?\)/g, '<a>$1</a>')
+  .replace(/^---$/gm, '<hr>').split(/\n{2,}/).filter((p) => p.trim()).map((p) => (p.trim() === '<hr>' ? '<hr>' : `<p>${p.trim()}</p>`)).join('');
 const tooltip = `${HEAD}<style>body{height:100vh;display:flex;flex-direction:column;justify-content:flex-end}
 .tip{position:absolute;right:70px;bottom:30px;width:420px;background:#202020;border:1px solid #454545;border-radius:4px;box-shadow:0 2px 8px #0000005c;padding:10px 12px;line-height:1.5}
-.tip p{margin:0 0 8px}.tip p:last-child{margin:0}.tip a{color:#4daafc}.tip code{font-family:Consolas,"DejaVu Sans Mono",monospace;color:#ffb27a}</style>
+.tip p{margin:0 0 8px}.tip p:last-child{margin:0}.tip a{color:#4daafc}.tip code{font-family:Consolas,"DejaVu Sans Mono",monospace;color:#ffb27a}
+.tip hr{border:0;border-top:1px solid #454545;margin:8px 0}</style>
 <div class="tip">${md(view.tooltip)}</div>${bar(view.items.map((s) => ({ ...s, level: 'hover' })))}</body></html>`;
 
 // 4. Choose Status Bar Style: the list, and the status bar already showing the highlighted one.
@@ -82,9 +85,30 @@ const picker = `${HEAD}<style>body{height:100vh;display:flex;flex-direction:colu
 <ul>${styleList('en').slice(0, 9).map((s) => `<li class="${s.id === pick ? 'on' : ''}"><i class="codicon ${s.id === 'classic' ? 'codicon-check' : ''} check"></i>${s.name} <span>${esc(s.description)}</span></li>`).join('')}</ul></div>
 ${bar(styleSegments(pick, u, now, 'en'))}</body></html>`;
 
+// 5. The Usage view: the real page (dist/) on demo numbers, dark and light.
+const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const demoDays = Array.from({ length: 30 }, (_, i) => {
+  const d = new Date(); d.setDate(d.getDate() - (29 - i));
+  const tokens = [0, 6].includes(d.getDay()) ? 1_200_000 : Math.round((6 + 14 * Math.abs(Math.sin(i * 1.3))) * 1_000_000);
+  return { day: dayKey(d), from: '', to: '', tokens, prompts: Math.round(tokens / 270_000), cost_usd: tokens / 680_000 };
+});
+const state = {
+  tracked: true, project: '~/work/my-app',
+  data: { range: '7d', at: Date.now() - 11_000, limits, now: project, session: { calls: 14, weighted: 1_800_000 }, days: demoDays, burn: 2_100_000,
+    modelsToday: null,
+    models: [{ key: 'opus', label: 'Opus', pct: 71, tokens: 71 }, { key: 'sonnet', label: 'Sonnet', pct: 24, tokens: 24 }, { key: 'haiku', label: 'Haiku', pct: 5, tokens: 5 }],
+    projects: { parts: [{ key: 'a', label: 'my-app', pct: 52, tokens: 52 }, { key: 'b', label: 'api', pct: 30, tokens: 30 }, { key: 'c', label: 'docs', pct: 18, tokens: 18 }], sessions: 23, capped: false } },
+};
+state.data.limits = { ...limits, five_hour: { used_percentage: 78, resets_at: now + 90 * 60 }, forecast_five_hour: { hits_at: now + 60 * 60, at_risk: true } };
+const dist = join(root, 'dist');
+const usagePage = (theme) => `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="file://${dist}/webview.css"></head>
+<body class="vscode-${theme}"><main id="app"></main><script>window.acquireVsCodeApi = () => ({ postMessage() {} });</script>
+<script src="file://${dist}/webview.js"></script><script>window.postMessage({ type: 'data', state: ${JSON.stringify(state)} }, '*');</script></body></html>`;
+
 const dir = mkdtempSync(join(tmpdir(), 'usage-shots-'));
 mkdirSync(out, { recursive: true });
-const shots = [['styles', styles, 980, 50 + (STYLE_IDS.length + 1) * 39], ['levels', levels, 980, 150], ['tooltip', tooltip, 900, 230], ['picker', picker, 900, 330]];
+const shots = [['styles', styles, 980, 50 + (STYLE_IDS.length + 1) * 39], ['levels', levels, 980, 150], ['tooltip', tooltip, 900, 380], ['picker', picker, 900, 330],
+  ['usage', usagePage('dark'), 1100, 870], ['usage-light', usagePage('light'), 1100, 870]];
 for (const [name, html, w, h] of shots) {
   const file = join(dir, `${name}.html`);
   writeFileSync(file, html);
