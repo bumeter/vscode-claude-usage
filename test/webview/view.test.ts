@@ -45,12 +45,31 @@ describe('Usage page', () => {
     expect(text()).toContain('out ≈');
     expect(root.querySelector('.qrow.warn')).not.toBeNull();
     expect([...root.querySelectorAll('.stat .big')].map((e) => e.textContent)).toEqual(['12.4M', '≈$18.20', '46', '2.1M/h']);
-    expect(text()).toContain('36% more than the previous period');
+    expect(text()).toContain('+36% vs previous period');
+    expect(root.querySelector('.stat .sub span')!.className).toBe('up');
+    expect(text()).toMatch(/resets [A-Z][a-z]{2} \d\d:\d\d · in 3d/);
+    expect(text()).toMatch(/resets \d\d:\d\d · in 1h30/);
+    expect(root.querySelectorAll('.qgrid > .qrow')).toHaveLength(2);
     expect(text()).toContain('This session · my-app');
     expect(text()).toContain('1.8M tokens · 14 turns · last reply 1 min ago');
     expect(root.querySelectorAll('.chart .col')).toHaveLength(7);
-    expect(root.querySelector<HTMLElement>('.chart .col.max')!.style.height).toBe('100%');
+    expect(root.querySelector<HTMLElement>('.chart .slot:last-child .col')!.className).toBe('col today');
+    expect(text()).toContain('peak 20.0M');
     expect([...root.querySelectorAll('.stack .part')].map((e) => e.textContent)).toEqual(['Opus 71%', 'Sonnet 29%', 'my-app 100%']);
+  });
+
+  it('a small change is plain; an old session is the latest, not this one; a narrow part shows only its share', () => {
+    const { root, text } = mount({}, {
+      days: [day(0, 10_500_000), day(1, 10_000_000)],
+      now: { latest: { session_id: 's1', ts: new Date(NOW - 3 * 3_600_000).toISOString(), context: 312_000 }, context_threshold: 400_000 },
+      models: [{ key: 'opus', label: 'Opus', pct: 95, tokens: 95 }, { key: 'haiku', label: 'Haiku', pct: 5, tokens: 5 }],
+    });
+    expect(text()).toContain('+5% vs previous period');
+    expect(root.querySelector('.stat .sub span')!.className).toBe('');
+    expect(text()).toContain('Latest session · my-app');
+    const haiku = [...root.querySelectorAll<HTMLElement>('.stack .part')][1];
+    expect(haiku.textContent).toBe('5%');
+    expect(haiku.title).toBe('Haiku 5%');
   });
 
   it('range buttons ask the extension; Bumeter link and setup too', () => {

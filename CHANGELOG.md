@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1
+
+- The weekly reset shows its day ("resets Thu 01:23"), and the quota bars line up.
+- The tooltip puts this session's turns and tokens right under its context line, and only while the session is current (30 minutes, like the context line). The Usage view calls an older one "Latest session".
+- A small change against the previous period ("+5% vs previous period") is no longer red: red or green starts at 20%.
+- Burn rate is labelled "now": it is always the last 30 minutes, whatever the range.
+- The daily chart marks today and shows the peak and average day; a narrow model or project slice shows only its share (the name is on hover).
+- Less work in the background: with the Usage view closed, numbers are read at most every 15 seconds, and not at all while full Bumeter hides the item.
+
 ## 0.3.0
 
 - **Usage view**: click the status bar item (or run **Open Usage**) for the quota and its forecast, tokens, estimated cost, prompts and burn rate for Today, 7 or 30 days, this session, a daily chart, and which models and projects used the quota. Bumeter's Overview look, light and dark.

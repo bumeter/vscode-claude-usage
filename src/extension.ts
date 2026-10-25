@@ -103,6 +103,8 @@ export function activate(ctx: vscode.ExtensionContext): void {
     },
   );
   const load = coalesce(reload, 2_000);
+  // With the page closed only the tooltip needs these numbers: read them less often.
+  const loadSlow = coalesce(reload, 15_000);
   const panel = new UsagePanel(ctx.extensionUri, lang, {
     ready: push,
     range: (r) => {
@@ -128,7 +130,9 @@ export function activate(ctx: vscode.ExtensionContext): void {
   };
   const full = () => vscode.extensions.getExtension(FULL_ID) !== undefined;
   status.setHidden(full());
-  const poll = setInterval(load, 60_000);
+  /** Claude Code wrote something: read again, often while the page is open, not at all while full Bumeter hides our item. */
+  const wake = () => (panel.isOpen ? load() : full() ? undefined : loadSlow());
+  const poll = setInterval(wake, 60_000);
 
   ctx.subscriptions.push(
     status,
@@ -173,7 +177,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
       if (e.event === 'scanning') status.scanning();
       else if (e.event === 'host' || e.event === 'data_changed') {
         void status.refresh();
-        load();
+        wake();
       }
     }) as unknown as vscode.Disposable,
   );

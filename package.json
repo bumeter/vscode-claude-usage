@@ -2,7 +2,7 @@
   "name": "bumeter-claude-usage",
   "displayName": "Claude Code Usage — Quota & Context in the Status Bar",
   "description": "See your Claude Code usage limits in the VS Code status bar: 5-hour and weekly quota left, reset times, a forecast and this workspace's context. 13 status bar styles. Local only, nothing leaves your machine. By Bumeter (unofficial, not made by Anthropic).",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "bumkom",
   "license": "GPL-3.0-or-later",
   "repository": {

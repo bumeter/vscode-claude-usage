@@ -3,13 +3,19 @@
 import { fmtClock, fmtCountdown, fmtTokens } from '@bumeter/vscode-kit/format';
 import type { Forecast, Window as QuotaWindow } from '@bumeter/vscode-kit/status';
 import type { FromPage, PageState } from '../src/panel';
-import { chartDays, compare, RANGES, shortProject } from '../src/usage';
+import { chartDays, compare, isActive, RANGES, shortProject } from '../src/usage';
 import type { Part, Range, UsageData } from '../src/usage';
 import { h } from './dom';
-import { s } from './strings';
+import { s, weekday } from './strings';
 
 const level = (pct: number) => (pct >= 90 ? 'err' : pct >= 70 ? 'warn' : 'ok');
 const clamp = (pct: number) => `${Math.min(100, Math.max(0, pct))}%`;
+/** A clock time, with the weekday when it is not within the next 20 hours. */
+const when = (secs: number, nowSecs: number) => (secs - nowSecs > 20 * 3600 ? `${weekday(secs)} ${fmtClock(secs)}` : fmtClock(secs));
+/** A change smaller than this is drawn plain, not red or green. */
+const NOTABLE = 0.2;
+/** A part this narrow shows only its percentage; the name is in its title. */
+const NARROW = 15;
 
 function fill(pct: number): HTMLElement {
   const f = h('div', { class: 'fill' });
@@ -48,10 +54,11 @@ export function mountUsage(root: HTMLElement, o: { post(m: FromPage): void; now?
         h('span', { class: 'qname' }, name),
         h('div', { class: 'track' }, fill(pct)),
         h('b', { class: 'qpct' }, `${pct}%`),
-        h('span', { class: 'muted' }, s('resets', { time: fmtClock(w.resets_at), left: fmtCountdown(w.resets_at, now() / 1000) })),
-        f?.at_risk && f.hits_at != null ? h('span', { class: 'out' }, s('out', { time: fmtClock(f.hits_at) })) : null);
+        h('span', { class: 'muted' }, s('resets', { time: when(w.resets_at, now() / 1000), left: fmtCountdown(w.resets_at, now() / 1000) })),
+        f?.at_risk && f.hits_at != null ? h('span', { class: 'out' }, s('out', { time: when(f.hits_at, now() / 1000) })) : null);
     };
-    for (const r of [row(s('fiveHour'), l.five_hour, l.forecast_five_hour), row(s('weekly'), l.seven_day, l.forecast_seven_day)]) if (r) box.append(r);
+    // One grid for both rows, so their bars line up whatever the texts beside them.
+    box.append(h('div', { class: 'qgrid' }, [row(s('fiveHour'), l.five_hour, l.forecast_five_hour), row(s('weekly'), l.seven_day, l.forecast_seven_day)]));
     return box;
   }
 
@@ -61,7 +68,7 @@ export function mountUsage(root: HTMLElement, o: { post(m: FromPage): void; now?
   function cards(d: UsageData): HTMLElement {
     const c = d.days ? compare(d.days, d.range, now()) : null;
     const change = c?.change == null || Math.round(c.change * 100) === 0 ? null
-      : h('span', { class: c.change > 0 ? 'up' : 'down' }, s(c.change > 0 ? 'up' : 'down', { pct: Math.abs(Math.round(c.change * 100)) }));
+      : h('span', { class: Math.abs(c.change) < NOTABLE ? '' : c.change > 0 ? 'up' : 'down' }, s(c.change > 0 ? 'up' : 'down', { pct: Math.abs(Math.round(c.change * 100)) }));
     return h('section', { class: 'stats' },
       stat(s('tokens'), c ? fmtTokens(c.cur.tokens) : '—', change, 'flame'),
       stat(s('cost'), c ? `≈$${c.cur.cost.toFixed(2)}` : '—', s('apiPricing')),
@@ -70,8 +77,9 @@ export function mountUsage(root: HTMLElement, o: { post(m: FromPage): void; now?
   }
 
   function session(d: UsageData, project: string | null): HTMLElement {
-    const box = panel(project ? s('session', { project: shortProject(project) }) : s('sessionNone'));
     const latest = d.now?.latest;
+    const title = isActive(d) || !latest ? 'session' : 'sessionLatest';
+    const box = panel(project ? s(title, { project: shortProject(project) }) : s('sessionNone'));
     if (!latest || !d.now) {
       box.append(h('p', { class: 'muted' }, s('noSession')));
       return box;
@@ -87,23 +95,24 @@ export function mountUsage(root: HTMLElement, o: { post(m: FromPage): void; now?
   }
 
   function daily(d: UsageData): HTMLElement {
-    const box = panel(s('daily'));
     const days = d.days ? chartDays(d.days, d.range, now()) : null;
     const max = days ? Math.max(0, ...days.map((x) => x.tokens)) : 0;
+    const box = panel(s('daily'), days && max ? s('peak', { peak: fmtTokens(max), avg: fmtTokens(days.reduce((a, x) => a + x.tokens, 0) / days.length) }) : undefined);
     if (!days || !max) {
       box.append(h('p', { class: 'muted' }, d.days ? s('noActivity') : '—'));
       return box;
     }
+    const today = days[days.length - 1].day;
     box.append(h('div', { class: 'chart' }, days.map((x) => {
-      const col = h('div', { class: x.tokens === max ? 'col max' : 'col', title: s('dayTip', { day: x.day, tokens: fmtTokens(x.tokens), prompts: x.prompts }) });
-      col.style.height = x.tokens === max ? '100%' : `${Math.max(2, (x.tokens / max) * 100)}%`;
+      const col = h('div', { class: x.day === today ? 'col today' : 'col', title: s('dayTip', { day: x.day, tokens: fmtTokens(x.tokens), prompts: x.prompts }) });
+      col.style.height = `${Math.max(2, (x.tokens / max) * 100)}%`;
       return h('div', { class: 'slot' }, h('div', { class: 'bar' }, col), h('span', { class: 'dlabel' }, x.day.slice(8)));
     })));
     return box;
   }
 
   const stack = (parts: Part[]) => h('div', { class: 'stack' }, parts.map((p, i) => {
-    const seg = h('div', { class: `part p${Math.min(i, 3)}`, title: `${p.label} ${p.pct}%` }, `${p.label} ${p.pct}%`);
+    const seg = h('div', { class: `part p${Math.min(i, 3)}`, title: `${p.label} ${p.pct}%` }, p.pct < NARROW ? `${p.pct}%` : `${p.label} ${p.pct}%`);
     seg.style.flexGrow = String(Math.max(p.pct, 1));
     return seg;
   }));

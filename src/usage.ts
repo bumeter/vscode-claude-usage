@@ -153,17 +153,23 @@ export async function fetchUsage(rpc: Rpc, project: string | null, range: Range,
 /** The tooltip allows HTML, so a project or model name must not break it. */
 const esc = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
-/** The tooltip's lines under the quota (the kit already draws the quota and the context). */
+/** A session counts as "this" one while its last reply is this recent: the kit's context line uses the same 30 minutes. */
+export const ACTIVE_MS = 30 * 60_000;
+export const isActive = (d: UsageData): boolean => {
+  const ts = d.now?.latest?.ts;
+  return !!ts && d.at - Date.parse(ts) <= ACTIVE_MS;
+};
+
+/** The tooltip's lines under the quota (the kit already draws the quota and the context). The session line
+ * follows the kit's context line, so it comes before the rule. */
 export function tooltipExtra(d: UsageData, lang: Lang, project: string | null): string {
   const lines: string[] = [];
-  if (project && d.now?.latest && d.session) {
-    lines.push(t(lang, 'tipSession', { project: esc(shortProject(project)), turns: String(d.session.calls), tokens: fmtTokens(d.session.weighted) }));
-  }
   if (d.days) {
     const c = sum(lastDays(d.days, 1, d.at));
     lines.push(t(lang, 'tipToday', { tokens: fmtTokens(c.tokens), cost: c.cost.toFixed(2), prompts: String(c.prompts) }));
   }
   if (d.burn) lines.push(t(lang, 'tipBurn', { rate: fmtTokens(d.burn) }));
   if (d.modelsToday?.length) lines.push(t(lang, 'tipModels', { list: d.modelsToday.map((p) => `${esc(p.label)} ${p.pct}%`).join(' · ') }));
-  return lines.length ? ['---', ...lines].join('\n\n') : '';
+  const head = project && d.session && isActive(d) ? [t(lang, 'tipSession', { turns: String(d.session.calls), tokens: fmtTokens(d.session.weighted) })] : [];
+  return [...head, ...(lines.length ? ['---', ...lines] : [])].join('\n\n');
 }

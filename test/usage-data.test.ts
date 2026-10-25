@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { burnRate, chartDays, compare, dayKey, isRange, lastDays, modelParts, projectParts, rangeStart, shortProject, sum, fetchUsage, tooltipExtra } from '../src/usage';
+import { burnRate, chartDays, compare, dayKey, isRange, lastDays, modelParts, projectParts, rangeStart, shortProject, sum, fetchUsage, isActive, tooltipExtra } from '../src/usage';
 import type { DayStat, PromptRow, UsageData } from '../src/usage';
 
 // Noon local time, so day boundaries do not depend on the machine's zone.
@@ -136,18 +136,25 @@ describe('tooltipExtra', () => {
     days: [day(0, 12_400_000, 46, 18.2)], burn: 2_100_000, modelsToday: [{ key: 'opus', label: 'Opus', pct: 71, tokens: 71 }, { key: 'sonnet', label: 'Sonnet', pct: 29, tokens: 29 }],
     models: null, projects: null };
 
-  it('session, today, burn and models after a rule', () => {
+  it('the session under the kit context line, then today, burn and models after a rule', () => {
     expect(tooltipExtra(base, 'en', '/w/my-app')).toBe([
+      '$(arrow-small-right) 14 turns · 1.8M tokens in this session',
       '---',
-      '**This session** · my-app: 14 turns · 1.8M tokens',
       '**Today** 12.4M tokens · ≈$18.20 · 46 prompts',
       '**Burn** 2.1M tokens/h (last 30 min)',
       '**Models today** Opus 71% · Sonnet 29%',
     ].join('\n\n'));
   });
 
-  it('escapes a project name for the HTML tooltip', () => {
-    expect(tooltipExtra(base, 'en', '/w/a<b')).toContain('**This session** · a&lt;b: 14 turns · 1.8M tokens');
+  it('escapes a model name for the HTML tooltip', () => {
+    expect(tooltipExtra({ ...base, modelsToday: [{ key: 'x', label: 'a<b', pct: 100, tokens: 1 }] }, 'en', '/w/my-app')).toContain('a&lt;b 100%');
+  });
+
+  it('no session line once the session is older than 30 minutes, as the kit drops its context line', () => {
+    const old = { ...base, now: { ...ANSWERS.project_now, latest: { ...ANSWERS.project_now.latest, ts: new Date(NOW - 31 * 60_000).toISOString() } } };
+    expect(tooltipExtra(old, 'en', '/w/my-app')).not.toContain('this session');
+    expect(isActive(old)).toBe(false);
+    expect(isActive(base)).toBe(true);
   });
 
   it('leaves out what it does not know; nothing at all is empty', () => {

@@ -63,11 +63,11 @@ const limits = { five_hour: { used_percentage: 62, resets_at: now + 80 * 60 }, s
   forecast_five_hour: { hits_at: null, at_risk: false }, forecast_seven_day: { hits_at: null, at_risk: false } };
 const project = { latest: { session_id: 's', ts: new Date((now - 60) * 1000).toISOString(), context: 312_000 }, context_threshold: 400_000 };
 const view = renderStatus(limits, project, '~/work/my-app', 'en', now, { id: 'x', name: 'Claude Code Usage', title: 'Claude Code Usage', html: true, click: '', fallback: '', noLimits: '',
-  extra: () => ['---', '**This session** · my-app: 14 turns · 1.8M tokens', '**Today** 12.4M tokens · ≈$18.20 · 46 prompts', '**Burn** 2.1M tokens/h (last 30 min)', '**Models today** Opus 71% · Sonnet 24% · Haiku 5%'].join('\n\n'),
+  extra: () => ['$(arrow-small-right) 14 turns · 1.8M tokens in this session', '---', '**Today** 12.4M tokens · ≈$18.20 · 46 prompts', '**Burn** 2.1M tokens/h (last 30 min)', '**Models today** Opus 71% · Sonnet 24% · Haiku 5%'].join('\n\n'),
   links: [{ label: 'Open Usage', command: '' }, { label: 'Refresh', command: '' }, { label: 'Choose style', command: '' }, { label: 'Get Bumeter', command: '' }] });
 const md = (s) => s.split(/(<span style="[^"]*">|<\/span>)/).map((p, i) => (i % 2 ? p : esc(p))).join('')
   .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`(.+?)`/g, '<code>$1</code>').replace(/\[(.+?)\]\(.*?\)/g, '<a>$1</a>')
-  .replace(/^---$/gm, '<hr>').split(/\n{2,}/).filter((p) => p.trim()).map((p) => (p.trim() === '<hr>' ? '<hr>' : `<p>${p.trim()}</p>`)).join('');
+  .replace(/\$\((\w[\w-]*)\)/g, '<i class="codicon codicon-$1"></i>').replace(/^---$/gm, '<hr>').split(/\n{2,}/).filter((p) => p.trim()).map((p) => (p.trim() === '<hr>' ? '<hr>' : `<p>${p.trim()}</p>`)).join('');
 const tooltip = `${HEAD}<style>body{height:100vh;display:flex;flex-direction:column;justify-content:flex-end}
 .tip{position:absolute;right:70px;bottom:30px;width:420px;background:#202020;border:1px solid #454545;border-radius:4px;box-shadow:0 2px 8px #0000005c;padding:10px 12px;line-height:1.5}
 .tip p{margin:0 0 8px}.tip p:last-child{margin:0}.tip a{color:#4daafc}.tip code{font-family:Consolas,"DejaVu Sans Mono",monospace;color:#ffb27a}
@@ -89,7 +89,8 @@ ${bar(styleSegments(pick, u, now, 'en'))}</body></html>`;
 const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const demoDays = Array.from({ length: 30 }, (_, i) => {
   const d = new Date(); d.setDate(d.getDate() - (29 - i));
-  const tokens = [0, 6].includes(d.getDay()) ? 1_200_000 : Math.round((6 + 14 * Math.abs(Math.sin(i * 1.3))) * 1_000_000);
+  // Lighter weekends, but never near zero: the shot should not look broken whatever day it is taken.
+  const tokens = Math.round((6 + 14 * Math.abs(Math.sin(i * 1.3))) * ([0, 6].includes(d.getDay()) ? 0.5 : 1) * (i >= 23 ? 1.1 : 1) * 1_000_000);
   return { day: dayKey(d), from: '', to: '', tokens, prompts: Math.round(tokens / 270_000), cost_usd: tokens / 680_000 };
 });
 const state = {
