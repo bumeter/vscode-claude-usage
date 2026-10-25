@@ -2,7 +2,7 @@
 
 ## 0.2.1
 
-- New icon: a quota gauge with the Bumeter flame.
+- New icon: a quota gauge with the Bumeter flame, orange on a dark tile.
 - Screenshots of every style, the tooltip and the picker on the Marketplace page, and an FAQ.
 
 ## 0.2.0
