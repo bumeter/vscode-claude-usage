@@ -1,7 +1,8 @@
 # Changelog
 
-## 0.3.1
+## 0.4.0
 
+- **Alerts**: a notification when the 5-hour or weekly quota crosses 80% or 90%, when at this pace it runs out before it resets, and when this session's context is over its threshold, each once per reset (or session). When Opus used half of today's quota or more, they add that `/model sonnet` uses less of it. **Open Usage** and **Don't remind me** on each; settings `claudeUsage.alerts` and `claudeUsage.alertAt`. Off while full Bumeter is installed.
 - The weekly reset shows its day ("resets Thu 01:23"), and the quota bars line up.
 - The tooltip puts this session's turns and tokens right under its context line, and only while the session is current (30 minutes, like the context line). The Usage view calls an older one "Latest session".
 - A small change against the previous period ("+5% vs previous period") is no longer red: red or green starts at 20%.

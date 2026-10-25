@@ -4,7 +4,7 @@
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/bumkom.bumeter-claude-usage)](https://marketplace.visualstudio.com/items?itemName=bumkom.bumeter-claude-usage)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 
-**See your Claude Code usage limits in the VS Code status bar:** how much of the **5-hour** and **weekly** quota is left, when each one resets, whether you will hit the limit before the reset, and how big this workspace's context is. 13 status bar styles to pick from, like a color theme. Local only, no account, no API key.
+**See your Claude Code usage limits in the VS Code status bar:** how much of the **5-hour** and **weekly** quota is left, when each one resets, whether you will hit the limit before the reset, and how big this workspace's context is. **Alerts before you run out**, and 13 status bar styles to pick from, like a color theme. Local only, no account, no API key.
 
 ![Claude Code 5-hour and weekly quota in the VS Code status bar, with reset times and context in the tooltip](https://raw.githubusercontent.com/bumeter/vscode-claude-usage/main/media/screenshots/tooltip.png)
 
@@ -14,6 +14,16 @@
 - **Hover** for reset times (`resets 14:30 · in 1h20`), the forecast, the context of this workspace's latest session, this session's turns and tokens, today's tokens, cost and prompts, the burn rate, and today's models.
 - **Local only**: everything is read from Claude Code's files on the machine the workspace is on. Nothing is uploaded, no account, no API key.
 - Works in remote windows (SSH, WSL, Dev Containers, Codespaces), and in Cursor and Windsurf.
+
+## Alerts
+
+A notification before the quota stops you, each once per reset:
+
+- the 5-hour or weekly quota crosses **80%** (information) or **90%** (warning): `You have used 82% of the 5-hour quota; it resets 22:52 (in 1h29).`
+- at this pace you will run out **before the reset**: `At this pace the 5-hour quota runs out ≈21:47, 1h05 before it resets.`
+- this session's **context** is over its threshold: `This session's context is 412K, over 400K: consider /compact.`
+
+When Opus used half of today's quota or more, the quota alerts add that `/model sonnet` uses less of it. **Open Usage** opens the view; **Don't remind me** turns alerts off (`claudeUsage.alerts`). The thresholds are `claudeUsage.alertAt`.
 
 ## Usage view
 
@@ -82,6 +92,8 @@ On Windows, run Remove Quota Tracking before uninstalling the extension. On Linu
 |---|---|---|
 | `claudeUsage.style` | `classic` | How the status bar draws the numbers; see [Styles](#styles) |
 | `claudeUsage.customFormat` | empty | The template of the `custom` style |
+| `claudeUsage.alerts` | `true` | Notify before the quota runs out; see [Alerts](#alerts). Off while full Bumeter is installed |
+| `claudeUsage.alertAt` | `[80, 90]` | Quota percentages that notify; from 90% it is a warning |
 | `claudeUsage.binaryPath` | empty | Path to `bum`; empty uses the one bundled with the extension, then `PATH` |
 
 ## Part of Bumeter

@@ -15,6 +15,11 @@ export const t = localize({
     current: 'đang dùng',
     tipSession: '$(arrow-small-right) {turns} lượt · {tokens} token trong phiên này', tipToday: '**Hôm nay** {tokens} token · ≈${cost} · {prompts} prompt',
     tipBurn: '**Tốc độ** {rate} token/giờ (30 phút qua)', tipModels: '**Model hôm nay** {list}', openUsage: 'Mở Usage', panelTitle: 'Claude Code Usage',
+    alert5h: 'hạn mức 5 giờ', alert7d: 'hạn mức tuần', alertPct: 'Bạn đã dùng {pct}% {name}, reset {time} (còn {left}).',
+    alertRisk: 'Theo tốc độ này, {name} sẽ cạn lúc ≈{time}, sớm hơn giờ reset {before}.',
+    alertOpus: 'Hôm nay Opus chiếm {pct}% hạn mức: "/model sonnet" tốn ít hơn.',
+    alertCtx: 'Context của phiên này là {ctx}, vượt ngưỡng {limit}: nên /compact.',
+    alertMute: 'Đừng nhắc nữa', alertMuted: 'Đã tắt cảnh báo hạn mức. Bật lại bằng setting claudeUsage.alerts.',
   },
   en: {
     usageSetup: 'No 5h/7d numbers yet. Click to open Usage and set up quota tracking: it adds a hook to Claude Code\'s statusLine (backed up, undoable).',
@@ -29,5 +34,10 @@ export const t = localize({
     current: 'current',
     tipSession: '$(arrow-small-right) {turns} turns · {tokens} tokens in this session', tipToday: '**Today** {tokens} tokens · ≈${cost} · {prompts} prompts',
     tipBurn: '**Burn** {rate} tokens/h (last 30 min)', tipModels: '**Models today** {list}', openUsage: 'Open Usage', panelTitle: 'Claude Code Usage',
+    alert5h: 'the 5-hour quota', alert7d: 'the weekly quota', alertPct: 'You have used {pct}% of {name}; it resets {time} (in {left}).',
+    alertRisk: 'At this pace {name} runs out ≈{time}, {before} before it resets.',
+    alertOpus: 'Opus used {pct}% of today\'s quota: "/model sonnet" uses less of it.',
+    alertCtx: 'This session\'s context is {ctx}, over {limit}: consider /compact.',
+    alertMute: 'Don\'t remind me', alertMuted: 'Quota alerts are off. Turn them back on with the setting claudeUsage.alerts.',
   },
 });

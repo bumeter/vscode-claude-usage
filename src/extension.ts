@@ -6,6 +6,7 @@ import * as fs from 'node:fs';
 import * as vscode from 'vscode';
 import { ensureExecutable, findBum, langOf, projectOf, RpcClient, StatusBar, t as shared } from '@bumeter/vscode-kit';
 import type { Lang } from '@bumeter/vscode-kit';
+import { ALERT_AT, dueAlerts } from './alerts';
 import { coalesce, latest } from './coalesce';
 import { usageOptions } from './options';
 import type { Look } from './options';
@@ -25,6 +26,8 @@ type Mode = 'record' | 'show';
 interface Settings { statusline: StatuslineStatus; statusline_show: boolean }
 
 let rpc: RpcClient | undefined;
+/** The alert keys already shown (see alerts.ts), in globalState. */
+const ALERTED = 'claudeUsage.alerted';
 
 async function settings(c: RpcClient): Promise<Settings | null> {
   return c.call<Settings>('settings:get').catch(() => null);
@@ -100,6 +103,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
       dataFull = full;
       status.redraw();
       push();
+      notify(d);
     },
   );
   const load = coalesce(reload, 2_000);
@@ -130,6 +134,27 @@ export function activate(ctx: vscode.ExtensionContext): void {
   };
   const full = () => vscode.extensions.getExtension(FULL_ID) !== undefined;
   status.setHidden(full());
+  /** Shows the quota and context alerts that are due, each once: what was shown is kept across restarts.
+   * None while full Bumeter is installed, which has its own. */
+  const notify = (d: UsageData) => {
+    const cfg = vscode.workspace.getConfiguration('claudeUsage');
+    if (!cfg.get<boolean>('alerts', true) || full()) return;
+    const at = (cfg.get<unknown[]>('alertAt') ?? ALERT_AT).filter((x): x is number => typeof x === 'number' && x > 0 && x <= 100);
+    const shown = ctx.globalState.get<string[]>(ALERTED, []);
+    const due = dueAlerts(d, lang, at, (k) => shown.includes(k));
+    if (!due.length) return;
+    void ctx.globalState.update(ALERTED, [...shown, ...due.flatMap((a) => a.keys)].slice(-100));
+    for (const a of due) {
+      const show = a.level === 'warning' ? vscode.window.showWarningMessage : vscode.window.showInformationMessage;
+      void show(`Claude Code Usage: ${a.text}`, t(lang, 'openUsage'), t(lang, 'alertMute')).then(async (pick) => {
+        if (pick === t(lang, 'openUsage')) await vscode.commands.executeCommand('claudeUsage.open');
+        else if (pick === t(lang, 'alertMute')) {
+          await cfg.update('alerts', false, vscode.ConfigurationTarget.Global);
+          void vscode.window.showInformationMessage(t(lang, 'alertMuted'));
+        }
+      });
+    }
+  };
   /** Claude Code wrote something: read again, often while the page is open, not at all while full Bumeter hides our item. */
   const wake = () => (panel.isOpen ? load() : full() ? undefined : loadSlow());
   const poll = setInterval(wake, 60_000);
