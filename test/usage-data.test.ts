@@ -146,6 +146,10 @@ describe('tooltipExtra', () => {
     ].join('\n\n'));
   });
 
+  it('escapes a project name for the HTML tooltip', () => {
+    expect(tooltipExtra(base, 'en', '/w/a<b')).toContain('**This session** · a&lt;b: 14 turns · 1.8M tokens');
+  });
+
   it('leaves out what it does not know; nothing at all is empty', () => {
     const v = tooltipExtra({ ...base, session: null, burn: 0, modelsToday: [] }, 'en', '/w/my-app');
     expect(v).toBe('---\n\n**Today** 12.4M tokens · ≈$18.20 · 46 prompts');

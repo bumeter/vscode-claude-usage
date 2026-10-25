@@ -5,7 +5,7 @@
   --acc: #ff9a4d; --acc2: #ffb377; --tint: #34271c; --red: #ff6b50; --grn: #48c98a; --amb: #f0b341;
   --r-panel: 16px; --r-box: 12px; --r-ctl: 10px;
 }
-body.vscode-light {
+body.vscode-light, body.vscode-high-contrast-light {
   --bg: #faf7f4; --surf: #ffffff; --sunk: #f4efea; --line: #efe8e1;
   --ink: #221a15; --ink2: #6b5f57; --ink3: #9a8d84;
   --acc: #ff7a1a; --acc2: #e8640a; --tint: #fff0e3; --red: #ff4b2b; --grn: #22a05a; --amb: #c98a00;
@@ -50,7 +50,7 @@ body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font: 13
 
 .setup { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--tint); border-radius: var(--r-box); padding: 10px 14px; }
 .setup p { margin: 0; }
-.btn { border: 0; background: var(--acc); color: #fff; font: inherit; font-weight: 600; padding: 6px 14px; border-radius: var(--r-ctl); cursor: pointer; }
+.btn { border: 0; background: var(--acc); color: #241304; font: inherit; font-weight: 600; padding: 6px 14px; border-radius: var(--r-ctl); cursor: pointer; }
 
 .chart { display: flex; align-items: flex-end; gap: 4px; height: 120px; }
 .slot { flex: 1; display: grid; grid-template-rows: 1fr auto; height: 100%; min-width: 0; }

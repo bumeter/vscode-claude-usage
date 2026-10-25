@@ -5,7 +5,7 @@ describe('usageOptions', () => {
   it('before the hook: the item asks to set up, and the tooltip links to it', () => {
     const o = usageOptions(false, 'en');
     expect(o.fallback).toBe('5h/7d: set up');
-    expect(o.noLimits).toContain('Click to set up quota tracking');
+    expect(o.noLimits).toContain('Click to open Usage and set up quota tracking');
     expect(o.links.map((l) => l.command)).toEqual(['claudeUsage.open', 'claudeUsage.setupTracking', 'claudeUsage.refresh', 'claudeUsage.chooseStyle', 'claudeUsage.getFull']);
   });
 

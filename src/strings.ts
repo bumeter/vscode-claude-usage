@@ -3,7 +3,7 @@ import { localize } from '@bumeter/vscode-kit/format';
 
 export const t = localize({
   vi: {
-    usageSetup: 'Chưa có số 5h/7d. Bấm để bật theo dõi hạn mức: thêm một hook vào statusLine của Claude Code (có sao lưu, gỡ được).',
+    usageSetup: 'Chưa có số 5h/7d. Bấm để mở Usage và bật theo dõi hạn mức: thêm một hook vào statusLine của Claude Code (có sao lưu, gỡ được).',
     usageWaiting: 'Đã bật theo dõi. Số 5h/7d hiện sau câu trả lời tiếp theo của Claude Code.',
     setupTracking: 'Bật theo dõi hạn mức', removeTracking: 'Gỡ theo dõi hạn mức', refresh: 'Làm mới', getFull: 'Bumeter đầy đủ: Overview, Skill, file',
     modeRecord: 'Chỉ ghi số', modeRecordDetail: 'Dòng statusline hiện tại của bạn giữ nguyên',
@@ -17,7 +17,7 @@ export const t = localize({
     tipBurn: '**Tốc độ** {rate} token/giờ (30 phút qua)', tipModels: '**Model hôm nay** {list}', openUsage: 'Mở Usage', panelTitle: 'Claude Code Usage',
   },
   en: {
-    usageSetup: 'No 5h/7d numbers yet. Click to set up quota tracking: it adds a hook to Claude Code\'s statusLine (backed up, undoable).',
+    usageSetup: 'No 5h/7d numbers yet. Click to open Usage and set up quota tracking: it adds a hook to Claude Code\'s statusLine (backed up, undoable).',
     usageWaiting: 'Tracking is on. The 5h/7d numbers appear after Claude Code\'s next reply.',
     setupTracking: 'Set up quota tracking', removeTracking: 'Remove quota tracking', refresh: 'Refresh', getFull: 'Full Bumeter: Overview, skills, files',
     modeRecord: 'Record only', modeRecordDetail: 'Your current status line stays as it is',
