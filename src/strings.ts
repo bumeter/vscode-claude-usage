@@ -13,6 +13,8 @@ export const t = localize({
     chooseStyle: 'Chọn style', styleTitle: 'Claude Code Usage: chọn style status bar (↑ ↓ để xem trước)', custom: 'Tự viết…',
     customDesc: 'Template của riêng bạn', customPrompt: 'Ví dụ: $(flame) {5h} | {7d} | ctx {ctxPct}. Biến: {vars}',
     current: 'đang dùng',
+    tipSession: '**Phiên này** · {project}: {turns} lượt · {tokens} token', tipToday: '**Hôm nay** {tokens} token · ≈${cost} · {prompts} prompt',
+    tipBurn: '**Tốc độ** {rate} token/giờ (30 phút qua)', tipModels: '**Model hôm nay** {list}', openUsage: 'Mở Usage', panelTitle: 'Claude Code Usage',
   },
   en: {
     usageSetup: 'No 5h/7d numbers yet. Click to set up quota tracking: it adds a hook to Claude Code\'s statusLine (backed up, undoable).',
@@ -25,5 +27,7 @@ export const t = localize({
     chooseStyle: 'Choose style', styleTitle: 'Claude Code Usage: status bar style (↑ ↓ to preview)', custom: 'Custom…',
     customDesc: 'Your own template', customPrompt: 'For example: $(flame) {5h} | {7d} | ctx {ctxPct}. Values: {vars}',
     current: 'current',
+    tipSession: '**This session** · {project}: {turns} turns · {tokens} tokens', tipToday: '**Today** {tokens} tokens · ≈${cost} · {prompts} prompts',
+    tipBurn: '**Burn** {rate} tokens/h (last 30 min)', tipModels: '**Models today** {list}', openUsage: 'Open Usage', panelTitle: 'Claude Code Usage',
   },
 });

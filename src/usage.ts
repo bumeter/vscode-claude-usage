@@ -1,6 +1,9 @@
 // The numbers of the Usage view and the tooltip: what to ask `bum`, and the sums over the answers.
 // Claude Code only. No `vscode` here, so it is tested in plain Node.
 import type { LimitState, ProjectNow } from '@bumeter/vscode-kit/status';
+import { fmtTokens } from '@bumeter/vscode-kit/format';
+import type { Lang } from '@bumeter/vscode-kit/format';
+import { t } from './strings';
 
 export const TOOL = 'claude_code';
 export type Range = 'today' | '7d' | '30d';
@@ -113,4 +116,51 @@ export function projectParts(list: ConversationList, top = 5): { parts: Part[]; 
   // `toParts` sorts by size; keep `other` last.
   parts.sort((a, b) => (a.key === 'other' ? 1 : b.key === 'other' ? -1 : 0));
   return { parts, sessions, capped: list.total_conversations > sessions };
+}
+
+export interface Rpc { call<T>(method: string, params?: unknown): Promise<T> }
+
+const safe = <T>(p: Promise<T>): Promise<T | null> => p.catch(() => null);
+
+/** Asks `bum` for everything at once; a failing call only empties its own part. `full` (the page is open)
+ * adds the range's models and the projects. */
+export async function fetchUsage(rpc: Rpc, project: string | null, range: Range, nowMs: number, full: boolean): Promise<UsageData> {
+  const today = rangeStart('today', nowMs).toISOString();
+  const from = rangeStart(range, nowMs).toISOString();
+  const wide = full && range !== 'today';
+  const [limits, now, days, recent, effToday, effRange, convs] = await Promise.all([
+    safe(rpc.call<LimitState>('limit_state')),
+    project ? safe(rpc.call<ProjectNow>('project_now', { project })) : Promise.resolve(null),
+    safe(rpc.call<DayStat[]>('day_stats', { tool: TOOL })),
+    safe(rpc.call<PromptRow[]>('recent_prompts', { limit: 200 })),
+    safe(rpc.call<Effect>('effectiveness', { from: today, tool: TOOL })),
+    wide ? safe(rpc.call<Effect>('effectiveness', { from, tool: TOOL })) : Promise.resolve(null),
+    full ? safe(rpc.call<ConversationList>('list_conversations', { from, tool: TOOL, limit: 1000 })) : Promise.resolve(null),
+  ]);
+  const sid = now?.latest?.session_id;
+  const session = sid ? await safe(rpc.call<SessionEconomics | null>('session_economics', { session_id: sid })) : null;
+  const models = (e: Effect | null) => (e ? modelParts(e.economics?.breakdown.by_model ?? []) : null);
+  const modelsToday = models(effToday);
+  return {
+    range, at: nowMs, limits, now, session, days,
+    burn: recent ? burnRate(recent, nowMs) : null,
+    modelsToday,
+    models: wide ? models(effRange) : modelsToday,
+    projects: convs ? projectParts(convs) : null,
+  };
+}
+
+/** The tooltip's lines under the quota (the kit already draws the quota and the context). */
+export function tooltipExtra(d: UsageData, lang: Lang, project: string | null): string {
+  const lines: string[] = [];
+  if (project && d.now?.latest && d.session) {
+    lines.push(t(lang, 'tipSession', { project: shortProject(project), turns: String(d.session.calls), tokens: fmtTokens(d.session.weighted) }));
+  }
+  if (d.days) {
+    const c = sum(lastDays(d.days, 1, d.at));
+    lines.push(t(lang, 'tipToday', { tokens: fmtTokens(c.tokens), cost: c.cost.toFixed(2), prompts: String(c.prompts) }));
+  }
+  if (d.burn) lines.push(t(lang, 'tipBurn', { rate: fmtTokens(d.burn) }));
+  if (d.modelsToday?.length) lines.push(t(lang, 'tipModels', { list: d.modelsToday.map((p) => `${p.label} ${p.pct}%`).join(' · ') }));
+  return lines.length ? ['---', ...lines].join('\n\n') : '';
 }
