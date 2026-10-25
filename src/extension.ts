@@ -6,7 +6,7 @@ import * as fs from 'node:fs';
 import * as vscode from 'vscode';
 import { ensureExecutable, findBum, langOf, projectOf, RpcClient, StatusBar, t as shared } from '@bumeter/vscode-kit';
 import type { Lang } from '@bumeter/vscode-kit';
-import { coalesce } from './coalesce';
+import { coalesce, latest } from './coalesce';
 import { usageOptions } from './options';
 import type { Look } from './options';
 import { UsagePanel } from './panel';
@@ -79,20 +79,29 @@ export function activate(ctx: vscode.ExtensionContext): void {
   const saved = ctx.workspaceState.get('claudeUsage.range');
   let range: Range = isRange(saved) ? saved : 'today';
   let data: UsageData | undefined;
+  let dataFull = false;
   let tracked = false;
   const extra = () => (data ? tooltipExtra(data, lang, project) : '');
   const opts = usageOptions(false, lang, look(), extra);
   const status = new StatusBar(c, project, lang, opts);
 
   const push = () => {
-    if (data) panel.post({ type: 'data', state: { data, tracked, project } });
+    if (data && dataFull) panel.post({ type: 'data', state: { data, tracked, project } });
   };
-  /** Reads every number again, for the tooltip and, while it is open, the page. */
-  const reload = async () => {
-    data = await fetchUsage(c, project, range, Date.now(), panel.isOpen);
-    status.redraw();
-    push();
-  };
+  /** Reads every number again, for the tooltip and, while it is open, the page. A sequence guard
+   * drops a slower, older fetch that resolves after a newer one. */
+  const reload = latest(
+    async () => {
+      const full = panel.isOpen;
+      return { d: await fetchUsage(c, project, range, Date.now(), full), full };
+    },
+    ({ d, full }) => {
+      data = d;
+      dataFull = full;
+      status.redraw();
+      push();
+    },
+  );
   const load = coalesce(reload, 2_000);
   const panel = new UsagePanel(ctx.extensionUri, lang, {
     ready: push,
