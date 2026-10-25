@@ -7,15 +7,19 @@ import { t } from './strings';
 
 export interface Look { style: StyleChoice; template: string }
 
-export function usageOptions(tracked: boolean, lang: Lang, look: Look = { style: 'classic', template: '' }): StatusOptions {
+export function usageOptions(tracked: boolean, lang: Lang, look: Look = { style: 'classic', template: '' }, extra?: () => string): StatusOptions {
   return {
     ...look,
     id: 'claudeUsage.status',
     name: 'Claude Code Usage',
-    click: 'claudeUsage.click',
+    title: 'Claude Code Usage',
+    html: true,
+    extra,
+    click: 'claudeUsage.open',
     fallback: tracked ? '5h/7d …' : '5h/7d: set up',
     noLimits: t(lang, tracked ? 'usageWaiting' : 'usageSetup'),
     links: [
+      { label: t(lang, 'openUsage'), command: 'claudeUsage.open' },
       ...(tracked ? [] : [{ label: t(lang, 'setupTracking'), command: 'claudeUsage.setupTracking' }]),
       { label: t(lang, 'refresh'), command: 'claudeUsage.refresh' },
       { label: t(lang, 'chooseStyle'), command: 'claudeUsage.chooseStyle' },
