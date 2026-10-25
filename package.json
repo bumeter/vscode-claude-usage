@@ -46,6 +46,11 @@
   "contributes": {
     "commands": [
       {
+        "command": "claudeUsage.open",
+        "title": "Open Usage",
+        "category": "Claude Code Usage"
+      },
+      {
         "command": "claudeUsage.setupTracking",
         "title": "Set Up Quota Tracking",
         "category": "Claude Code Usage"

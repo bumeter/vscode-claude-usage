@@ -6,13 +6,17 @@ import * as fs from 'node:fs';
 import * as vscode from 'vscode';
 import { ensureExecutable, findBum, langOf, projectOf, RpcClient, StatusBar, t as shared } from '@bumeter/vscode-kit';
 import type { Lang } from '@bumeter/vscode-kit';
+import { coalesce } from './coalesce';
 import { usageOptions } from './options';
 import type { Look } from './options';
+import { UsagePanel } from './panel';
 import { chooseStyle } from './picker';
 import { t } from './strings';
 import { styleSetting } from './styles';
 import { isTracked, needsRepoint } from './tracking';
 import type { StatuslineStatus } from './tracking';
+import { fetchUsage, isRange, tooltipExtra } from './usage';
+import type { Range, UsageData } from './usage';
 
 /** The full Bumeter extension. */
 export const FULL_ID = 'bumkom.bumeter';
@@ -62,7 +66,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
     item.tooltip = shared(lang, 'noBum');
     item.command = { title: 'Settings', command: 'workbench.action.openSettings', arguments: ['claudeUsage.binaryPath'] };
     item.show();
-    ctx.subscriptions.push(item);
+    ctx.subscriptions.push(item, vscode.commands.registerCommand('claudeUsage.open', () => void vscode.window.showWarningMessage(shared(lang, 'noBum'))));
     return;
   }
   if (bin.startsWith(ctx.extensionPath)) ensureExecutable(bin);
@@ -71,9 +75,35 @@ export function activate(ctx: vscode.ExtensionContext): void {
     const cfg = vscode.workspace.getConfiguration('claudeUsage');
     return { style: styleSetting(cfg.get('style')), template: cfg.get<string>('customFormat', '') };
   };
-  const opts = usageOptions(false, lang, look());
-  const status = new StatusBar(c, projectOf(vscode.workspace.workspaceFolders), lang, opts);
+  const project = projectOf(vscode.workspace.workspaceFolders);
+  const saved = ctx.workspaceState.get('claudeUsage.range');
+  let range: Range = isRange(saved) ? saved : 'today';
+  let data: UsageData | undefined;
   let tracked = false;
+  const extra = () => (data ? tooltipExtra(data, lang, project) : '');
+  const opts = usageOptions(false, lang, look(), extra);
+  const status = new StatusBar(c, project, lang, opts);
+
+  const push = () => {
+    if (data) panel.post({ type: 'data', state: { data, tracked, project } });
+  };
+  /** Reads every number again, for the tooltip and, while it is open, the page. */
+  const reload = async () => {
+    data = await fetchUsage(c, project, range, Date.now(), panel.isOpen);
+    status.redraw();
+    push();
+  };
+  const load = coalesce(reload, 2_000);
+  const panel = new UsagePanel(ctx.extensionUri, lang, {
+    ready: push,
+    range: (r) => {
+      range = r;
+      void ctx.workspaceState.update('claudeUsage.range', r);
+      void reload();
+    },
+    setup: () => void vscode.commands.executeCommand('claudeUsage.setupTracking'),
+    getFull: () => void vscode.commands.executeCommand('claudeUsage.getFull'),
+  });
 
   /** Reads the hook's state, points an outdated hook at our `bum`, then redraws. */
   const sync = async () => {
@@ -83,24 +113,31 @@ export function activate(ctx: vscode.ExtensionContext): void {
       await c.call('settings:statusline_apply', { mode }).catch(() => undefined);
     }
     tracked = isTracked(s?.statusline);
-    Object.assign(opts, usageOptions(tracked, lang, look()));
+    Object.assign(opts, usageOptions(tracked, lang, look(), extra));
     await status.refresh();
+    load();
   };
   const full = () => vscode.extensions.getExtension(FULL_ID) !== undefined;
   status.setHidden(full());
+  const poll = setInterval(load, 60_000);
 
   ctx.subscriptions.push(
     status,
+    panel,
+    { dispose: () => clearInterval(poll) },
     { dispose: () => rpc?.dispose() },
     vscode.extensions.onDidChange(() => status.setHidden(full())),
     vscode.commands.registerCommand('claudeUsage.refresh', () => void sync()),
+    vscode.commands.registerCommand('claudeUsage.open', () => {
+      panel.open();
+      void reload();
+    }),
     vscode.commands.registerCommand('claudeUsage.chooseStyle', () => chooseStyle(status, opts, lang, look())),
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (!e.affectsConfiguration('claudeUsage.style') && !e.affectsConfiguration('claudeUsage.customFormat')) return;
       Object.assign(opts, look());
       status.redraw();
     }),
-    vscode.commands.registerCommand('claudeUsage.click', () => (tracked ? void sync() : vscode.commands.executeCommand('claudeUsage.setupTracking'))),
     vscode.commands.registerCommand('claudeUsage.setupTracking', async () => {
       try {
         if (await setUp(c, lang)) await sync();
@@ -125,7 +162,10 @@ export function activate(ctx: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('claudeUsage.getFull', () => vscode.commands.executeCommand('extension.open', FULL_ID)),
     c.onEvent((e) => {
       if (e.event === 'scanning') status.scanning();
-      else if (e.event === 'host' || e.event === 'data_changed') void status.refresh();
+      else if (e.event === 'host' || e.event === 'data_changed') {
+        void status.refresh();
+        load();
+      }
     }) as unknown as vscode.Disposable,
   );
   void sync();
