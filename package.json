@@ -140,11 +140,12 @@
     "bundle-bum": "node scripts/bundle-bum.mjs"
   },
   "devDependencies": {
-    "@bumeter/vscode-kit": "^0.2.0",
+    "@bumeter/vscode-kit": "file:../vscode-kit",
     "@types/node": "^20.0.0",
     "@types/vscode": "1.85.0",
     "@vscode/vsce": "^3.0.0",
     "esbuild": "^0.28.0",
+    "jsdom": "^25.0.1",
     "typescript": "^5.6.0",
     "vitest": "^3.2.0"
   },

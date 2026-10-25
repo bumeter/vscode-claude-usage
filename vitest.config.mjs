@@ -1,8 +1,8 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
-// Unit tests run in plain Node on the parts that do not need `vscode`.
+// The extension's parts run in plain Node with a small `vscode` stub; the webview's run in jsdom.
 export default defineConfig({
   resolve: { alias: { vscode: fileURLToPath(new URL('./test/vscode.ts', import.meta.url)) } },
-  test: { include: ['test/**/*.test.ts'] },
+  test: { include: ['test/**/*.test.ts'], environmentMatchGlobs: [['test/webview/**', 'jsdom']] },
 });

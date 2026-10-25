@@ -14,3 +14,4 @@ BUM_VERSION
 media/icon.svg
 media/screenshots/**
 media/social-preview.png
+webview/**
